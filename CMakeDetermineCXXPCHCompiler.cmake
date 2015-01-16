@@ -10,6 +10,6 @@ set(CMAKE_CXXPCH_COMPILER_ENV_VAR "CXXPCH")
 set(CMAKE_CXXPCH_COMPILER ${CMAKE_CXX_COMPILER})
 
 configure_file(
-	cmake/CMakeCXXPCHCompiler.cmake.in
+	${CMAKE_CURRENT_LIST_DIR}/CMakeCXXPCHCompiler.cmake.in
 	${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXPCHCompiler.cmake
 	)
