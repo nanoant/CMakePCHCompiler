@@ -24,6 +24,12 @@ else()
 	set(CMAKE_CXXPCH_OUTPUT_EXTENSION .pch)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID)
+	include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-CXXPCH
+		OPTIONAL
+		)
+endif()
+
 include(CMakeParseArguments)
 
 function(target_precompiled_header target header) # [SHARED shared] [TYPE type]
