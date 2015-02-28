@@ -37,6 +37,25 @@ Example
 	target_link_libraries(demo engine)
 	target_precompiled_header(demo src/prefix.h SHARED engine)
 
+What it is about?
+-----------------
+
+*CMake* does not support precompiled headers by default. There are several
+modules providing precompiled header support, but all of them use custom
+commands and complicated wrappers to achieve their goals.
+
+This module is somehow different. It defines a *meta C++ compiler* that simply
+just patches compiler command template for precompiled header case.
+
+Next it treats precompiled header file as source file for `CXXPCH` that makes
+*CMake* use `CXXPCH` patched instead origin `CXX` compiler template. This
+ensures that all `CXX` language flags and specific settings are also applied to
+precompiled header.
+
+This module is also transparent to source code. There is absolutely no need to
+change you source files. Only requirement is a precompiled header `.h` file
+added to given target via `target_precompiled_header` function.
+
 License
 -------
 
