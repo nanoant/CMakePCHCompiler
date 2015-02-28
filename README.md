@@ -49,12 +49,27 @@ just patches compiler command template for precompiled header case.
 
 Next it treats precompiled header file as source file for `CXXPCH` that makes
 *CMake* use `CXXPCH` patched instead origin `CXX` compiler template. This
-ensures that all `CXX` language flags and specific settings are also applied to
-precompiled header.
+ensures that all `CXX` language flags and specific settings such as these
+populated by `add_definitions` are also applied to precompiled header.
+
+Passing same flags during precompiled header and other source files compilation
+is very important. It is simply impossible to catch all flags, such as these
+defined after calling `target_precompiled_header` or these using *CMake*
+internal variables such as `add_definitions`, using custom commands. This is
+the reason for such implementation.
 
 This module is also transparent to source code. There is absolutely no need to
 change you source files. Only requirement is a precompiled header `.h` file
 added to given target via `target_precompiled_header` function.
+
+Nevertheless this is not an ideal solution. In perfect world it is *CMake* that
+should handle precompiled headers generation internally, based on given
+compiler command templates. However this may be good start to request native
+support using simple API of:
+
+	target_precompiled_header(<target> <path/to/precompiled_header.h>)
+	target_precompiled_header(<target> <path/to/precompiled_header.h> SHARED
+	                          <other_target_to_share_precompiled_header_with>)
 
 License
 -------
