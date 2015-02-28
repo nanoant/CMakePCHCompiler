@@ -24,12 +24,39 @@ else()
 	set(CMAKE_CXXPCH_OUTPUT_EXTENSION .pch)
 endif()
 
+# setup compiler & platform specific flags same way CXX does
 if(CMAKE_CXX_COMPILER_ID)
 	include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-CXXPCH
 		OPTIONAL
 		)
 endif()
 
+# just use all settings from CXX compiler
+string(REPLACE "CXXPCH" "CXX"
+	CMAKE_CXXPCH_COMPILE_OBJECT
+	${CMAKE_CXXPCH_COMPILE_OBJECT}
+	)
+
+if(MSVC)
+	# redirect object file to NUL and just create precompiled header
+	# /FoNUL - do not write output object file file
+	# /Fp - specify location for precompiled header
+	string(REPLACE " /Fo" " /FoNUL /Fp"
+		CMAKE_CXXPCH_COMPILE_OBJECT
+		${CMAKE_CXXPCH_COMPILE_OBJECT}
+		)
+	# disable pdb, we point to later to different location
+	string(REPLACE " /Fd<TARGET_COMPILE_PDB>" ""
+		CMAKE_CXXPCH_COMPILE_OBJECT
+		${CMAKE_CXXPCH_COMPILE_OBJECT}
+		)
+endif()
+
+# copy all initial settings for CXXPCH from CXX
+set(CMAKE_CXXPCH_FLAGS "${CMAKE_CXX_FLAGS_INIT}"
+	CACHE STRING
+	"Flags used by the compiler during all build types."
+	)
 if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 	set(CMAKE_CXXPCH_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG_INIT}"
 		CACHE STRING
@@ -51,6 +78,10 @@ endif()
 
 include(CMakeParseArguments)
 
+################################################################################
+# PUBLIC INTERFACE FUNCTIONS
+################################################################################
+
 function(target_precompiled_header target header) # [SHARED shared] [TYPE type]
 	if(NOT MSVC AND
 		NOT CMAKE_COMPILER_IS_GNUCXX AND
@@ -71,11 +102,18 @@ function(target_precompiled_header target header) # [SHARED shared] [TYPE type]
 			set(header_type "c++-header")
 		endif()
 		if(MSVC)
+			# ensure pdb goes to the same location, otherwise we get C2859
+			file(TO_NATIVE_PATH
+				"${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${target}.dir"
+				pdb_dir
+				)
+			# /Yc - create precompiled header
+			# /Fd - specify directory for pdb output
 			set_source_files_properties(
 				${header}
 				PROPERTIES
 				LANGUAGE CXXPCH
-				COMPILE_FLAGS "/Yc${header}"
+				COMPILE_FLAGS "/Yc /Fd${pdb_dir}\\"
 				)
 		else()
 			set_source_files_properties(
@@ -89,10 +127,19 @@ function(target_precompiled_header target header) # [SHARED shared] [TYPE type]
 		set(pch_target ${target}.pch)
 	endif()
 	add_dependencies(${target} ${pch_target})
-	set(target_dir 
+	set(target_dir
 		${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
 		)
-	if(CMAKE_COMPILER_IS_GNUCXX OR MSVC)
+	if(MSVC)
+		get_filename_component(win_header "${header}" NAME)
+		file(TO_NATIVE_PATH "${target_dir}/${header}.pch" win_pch)
+		# /Yu - use given include as precompiled header
+		# /Fp - exact location for precompiled header
+		# /FI - force include of precompiled header
+		set_target_properties(${target} PROPERTIES
+			COMPILE_FLAGS "/Yu${win_header} /Fp${win_pch} /FI${win_header}"
+			)
+	elseif(CMAKE_COMPILER_IS_GNUCXX)
 		target_include_directories(${target} PRIVATE ${target_dir})
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		set_target_properties(${target} PROPERTIES
