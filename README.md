@@ -14,6 +14,13 @@ precompiled just once.
 
 Also header may be given different type that default `c++-header`.
 
+Supported & tested platforms
+----------------------------
+
+1. *Windows* with `MSVC`, tested on *VS2015*
+2. *OSX* with `Clang`, `GCC`, tested on *OSX 10.10* & *Xcode 6.1*
+3. *Linux* with `GCC`, tested on *Ubuntu 14.04 LTS* & *GCC 4.8*
+
 Example
 -------
 
