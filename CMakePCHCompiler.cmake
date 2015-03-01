@@ -33,6 +33,7 @@ function(target_precompiled_header) # target [...] header
 	set(lang ${CMAKE_PCH_COMPILER_LANGUAGE})
 	if(NOT MSVC AND
 		NOT CMAKE_COMPILER_IS_GNU${lang} AND
+		NOT CMAKE_${lang}_COMPILER_ID STREQUAL "GNU" AND
 		NOT CMAKE_${lang}_COMPILER_ID STREQUAL "Clang"
 		)
 		message(WARNING
@@ -98,9 +99,7 @@ function(target_precompiled_header) # target [...] header
 			set_target_properties(${target} PROPERTIES
 				COMPILE_FLAGS "/Yu${win_header} /Fp${win_pch} /FI${win_header}"
 				)
-		elseif(CMAKE_COMPILER_IS_GNU${lang})
-			target_include_directories(${target} PRIVATE ${target_dir})
-		elseif(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+		else()
 			set_target_properties(${target} PROPERTIES
 				COMPILE_FLAGS "-include ${target_dir}/${header}"
 				)
@@ -113,7 +112,9 @@ macro(__define_pch_compiler lang)
 		set(CMAKE_PCH_COMPILER_LANGUAGE ${lang})
 	endif()
 	set(CMAKE_${lang}PCH_COMPILE_OBJECT ${CMAKE_${lang}_COMPILE_OBJECT})
-	if(CMAKE_COMPILER_IS_GNU${lang})
+	if(CMAKE_COMPILER_IS_GNU${lang} OR
+		CMAKE_${lang}_COMPILER_ID STREQUAL "GNU"
+		)
 		set(CMAKE_${lang}PCH_OUTPUT_EXTENSION .gch)
 	else()
 		set(CMAKE_${lang}PCH_OUTPUT_EXTENSION .pch)
