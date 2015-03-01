@@ -5,7 +5,9 @@ This module defines extra CXXPCH compiler that compiles `.h` into `.pch/.gch`.
 
 For convenience it defines
 
-	target_precompiled_header(target header [SHARED other_target] [TYPE type])
+	target_precompiled_header(target [...] header
+	                          [REUSE other_target]
+	                          [TYPE type])
 
 Uses given header as precompiled header for given target.
 
@@ -35,7 +37,7 @@ Example
 	
 	add_executable(demo src/demo.cpp)
 	target_link_libraries(demo engine)
-	target_precompiled_header(demo src/prefix.h SHARED engine)
+	target_precompiled_header(demo src/prefix.h REUSE engine)
 
 What it is about?
 -----------------
@@ -68,8 +70,10 @@ compiler command templates. However this may be good start to request native
 support using simple API of:
 
 	target_precompiled_header(<target> <path/to/precompiled_header.h>)
-	target_precompiled_header(<target> <path/to/precompiled_header.h> SHARED
-	                          <other_target_to_share_precompiled_header_with>)
+	target_precompiled_header(<target1> <target2>
+	                          <path/to/precompiled_header.h>)
+	target_precompiled_header(<target> <path/to/precompiled_header.h> REUSE
+	                          <other_target_to_reuse_precompiled_header_from>)
 
 License
 -------
