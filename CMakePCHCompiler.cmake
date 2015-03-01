@@ -4,19 +4,22 @@
 #
 # Defines following functions:
 #
-# target_precompiled_header(target header [SHARED other_target] [TYPE type])
+# target_precompiled_header(target [...] header
+#                          [REUSE reuse_target]
+#                          [TYPE type])
 #
 # Uses given header as precompiled header for given target.
 #
-# Optionally it may share compiled header object with other target, so it is 
-# precompiled just once.
+# Optionally it may reuse existing compiled header object from other target, so
+# it is precompiled just once. Both targets need to have same compiler
+# arguments otherwise compilation will fale.
 #
 # Also header may be given different type that default "c-header"/"c++-header".
 #
-# Do not include this file directly, rather specify that project uses ${lang}PCH or
+# Do not include this file directly, rather specify that project uses CPCH or
 # CXXPCH language with:
 #
-# project(project_name C ${lang}PCH)     # plain C project
+# project(project_name C CPCH)     # plain C project
 # project(project_name CXX CXXPCH) # C++ project
 
 # Author: Adam Strzelecki <ono@java.pl>
@@ -25,7 +28,8 @@
 
 include(CMakeParseArguments)
 
-function(target_precompiled_header target header) # [SHARED shared] [TYPE type]
+function(target_precompiled_header) # target [...] header
+                                    # [REUSE reuse_target] [TYPE type]
 	set(lang ${CMAKE_PCH_COMPILER_LANGUAGE})
 	if(NOT MSVC AND
 		NOT CMAKE_COMPILER_IS_GNU${lang} AND
@@ -36,65 +40,72 @@ function(target_precompiled_header target header) # [SHARED shared] [TYPE type]
 			)
 		return()
 	endif()
-	cmake_parse_arguments(ARGS "" "SHARED;TYPE" "" ${ARGN})
+	cmake_parse_arguments(ARGS "" "REUSE;TYPE" "" ${ARGN})
 	if(ARGS_SHARED)
-		set(pch_target ${ARGS_SHARED}.pch)
-	else()
-		if(ARGS_TYPE)
-			set(header_type ${ARGS_TYPE})
-		elseif(lang STREQUAL C)
-			set(header_type "c-header")
-		elseif(lang STREQUAL CXX)
-			set(header_type "c++-header")
+		set(ARGS_REUSE ${ARGS_SHARED})
+	endif()
+	list(GET ARGS_UNPARSED_ARGUMENTS -1 header)
+	list(REMOVE_AT ARGS_UNPARSED_ARGUMENTS -1)
+	foreach(target ${ARGS_UNPARSED_ARGUMENTS})
+		if(ARGS_REUSE)
+			set(pch_target ${ARGS_REUSE}.pch)
 		else()
-			message(WARNING "Unknown header type for language ${lang}")
-			set(header_type "c++-header")
+			if(ARGS_TYPE)
+				set(header_type ${ARGS_TYPE})
+			elseif(lang STREQUAL C)
+				set(header_type "c-header")
+			elseif(lang STREQUAL CXX)
+				set(header_type "c++-header")
+			else()
+				message(WARNING "Unknown header type for language ${lang}")
+				set(header_type "c++-header")
+			endif()
+			if(MSVC)
+				# ensure pdb goes to the same location, otherwise we get C2859
+				file(TO_NATIVE_PATH
+					"${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${target}.dir"
+					pdb_dir
+					)
+				# /Yc - create precompiled header
+				# /Fd - specify directory for pdb output
+				set_source_files_properties(
+					${header}
+					PROPERTIES
+					LANGUAGE ${lang}PCH
+					COMPILE_FLAGS "/Yc /Fd${pdb_dir}\\"
+					)
+			else()
+				set_source_files_properties(
+					${header}
+					PROPERTIES
+					LANGUAGE ${lang}PCH
+					COMPILE_FLAGS "-x ${header_type}"
+					)
+			endif()
+			add_library(${target}.pch OBJECT ${header})
+			set(pch_target ${target}.pch)
 		endif()
+		add_dependencies(${target} ${pch_target})
+		set(target_dir
+			${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
+			)
 		if(MSVC)
-			# ensure pdb goes to the same location, otherwise we get C2859
-			file(TO_NATIVE_PATH
-				"${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${target}.dir"
-				pdb_dir
+			get_filename_component(win_header "${header}" NAME)
+			file(TO_NATIVE_PATH "${target_dir}/${header}.pch" win_pch)
+			# /Yu - use given include as precompiled header
+			# /Fp - exact location for precompiled header
+			# /FI - force include of precompiled header
+			set_target_properties(${target} PROPERTIES
+				COMPILE_FLAGS "/Yu${win_header} /Fp${win_pch} /FI${win_header}"
 				)
-			# /Yc - create precompiled header
-			# /Fd - specify directory for pdb output
-			set_source_files_properties(
-				${header}
-				PROPERTIES
-				LANGUAGE ${lang}PCH
-				COMPILE_FLAGS "/Yc /Fd${pdb_dir}\\"
-				)
-		else()
-			set_source_files_properties(
-				${header}
-				PROPERTIES
-				LANGUAGE ${lang}PCH
-				COMPILE_FLAGS "-x ${header_type}"
+		elseif(CMAKE_COMPILER_IS_GNU${lang})
+			target_include_directories(${target} PRIVATE ${target_dir})
+		elseif(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+			set_target_properties(${target} PROPERTIES
+				COMPILE_FLAGS "-include ${target_dir}/${header}"
 				)
 		endif()
-		add_library(${target}.pch OBJECT ${header})
-		set(pch_target ${target}.pch)
-	endif()
-	add_dependencies(${target} ${pch_target})
-	set(target_dir
-		${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
-		)
-	if(MSVC)
-		get_filename_component(win_header "${header}" NAME)
-		file(TO_NATIVE_PATH "${target_dir}/${header}.pch" win_pch)
-		# /Yu - use given include as precompiled header
-		# /Fp - exact location for precompiled header
-		# /FI - force include of precompiled header
-		set_target_properties(${target} PROPERTIES
-			COMPILE_FLAGS "/Yu${win_header} /Fp${win_pch} /FI${win_header}"
-			)
-	elseif(CMAKE_COMPILER_IS_GNU${lang})
-		target_include_directories(${target} PRIVATE ${target_dir})
-	elseif(CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
-		set_target_properties(${target} PROPERTIES
-			COMPILE_FLAGS "-include ${target_dir}/${header}"
-			)
-	endif()
+	endforeach()
 endfunction()
 
 macro(__define_pch_compiler lang)
