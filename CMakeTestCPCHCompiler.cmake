@@ -1,11 +1,9 @@
-# Precompiled Header creation for C++
+# Precompiled Header creation for C
 #
 # Author: Adam Strzelecki <ono@java.pl>
 # Copyright (c) 2014-2015 Adam Strzelecki. All rights reserved.
 # This code is licensed under the MIT License, see README.md.
 #
-# Main entry point for new compiler. Here it just proxies to C++ compiler.
+# Just set the compiler works.
 
-include(CMakePCHCompiler)
-
-__configure_pch_compiler(CXX)
+set(CMAKE_CPCH_COMPILER_WORKS 1 CACHE INTERNAL "")
