@@ -64,7 +64,7 @@ function(target_precompiled_header) # target [...] header
 			if(MSVC)
 				# ensure pdb goes to the same location, otherwise we get C2859
 				file(TO_NATIVE_PATH
-					"${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${target}.dir"
+					"${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${target}.dir"
 					pdb_dir
 					)
 				# /Yc - create precompiled header
@@ -88,7 +88,7 @@ function(target_precompiled_header) # target [...] header
 		endif()
 		add_dependencies(${target} ${pch_target})
 		set(target_dir
-			${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
+			${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
 			)
 		if(MSVC)
 			get_filename_component(win_header "${header}" NAME)
