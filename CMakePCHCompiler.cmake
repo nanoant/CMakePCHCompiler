@@ -191,7 +191,7 @@ endmacro()
 macro(__watch_pch_variable variable access value)
 	string(REPLACE _C_ _CPCH_ pchvariable ${variable})
 	string(REPLACE _CXX_ _CXXPCH_ pchvariable ${pchvariable})
-	set(${pchvariable} ${value})
+	set(${pchvariable} ${${variable}}) # because ${value} expands backslashes
 endmacro()
 
 macro(__configure_pch_compiler lang)
