@@ -107,6 +107,10 @@ function(target_precompiled_header) # target [...] header
 	endforeach()
 endfunction()
 
+################################################################################
+# PRIVATE MACROS
+################################################################################
+
 macro(__define_pch_compiler lang)
 	if(NOT CMAKE_PCH_COMPILER_LANGUAGE)
 		set(CMAKE_PCH_COMPILER_LANGUAGE ${lang})
@@ -153,11 +157,13 @@ macro(__define_pch_compiler lang)
 			)
 	endif()
 
-	# copy all initial settings for C/CXXPCH from C/CXX
+	# copy all initial settings for C/CXXPCH from C/CXX & watch them
 	set(CMAKE_${lang}PCH_FLAGS "${CMAKE_${lang}_FLAGS_INIT}"
 		CACHE STRING
 		"Flags used by the compiler during all build types."
 		)
+	variable_watch(CMAKE_${lang}_FLAGS __watch_pch_variable)
+
 	if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 		set(CMAKE_${lang}PCH_FLAGS_DEBUG "${CMAKE_${lang}_FLAGS_DEBUG_INIT}"
 			CACHE STRING
@@ -175,7 +181,17 @@ macro(__define_pch_compiler lang)
 			CACHE STRING
 			"Flags used by the compiler during release builds with debug info."
 			)
+		variable_watch(CMAKE_${lang}_FLAGS_DEBUG          __watch_pch_variable)
+		variable_watch(CMAKE_${lang}_FLAGS_MINSIZEREL     __watch_pch_variable)
+		variable_watch(CMAKE_${lang}_FLAGS_RELEASE        __watch_pch_variable)
+		variable_watch(CMAKE_${lang}_FLAGS_RELWITHDEBINFO __watch_pch_variable)
 	endif()
+endmacro()
+
+macro(__watch_pch_variable variable access value)
+	string(REPLACE _C_ _CPCH_ pchvariable ${variable})
+	string(REPLACE _CXX_ _CXXPCH_ pchvariable ${pchvariable})
+	set(${pchvariable} ${value})
 endmacro()
 
 macro(__configure_pch_compiler lang)
