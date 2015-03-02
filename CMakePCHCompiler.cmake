@@ -111,7 +111,12 @@ macro(__define_pch_compiler lang)
 	if(NOT CMAKE_PCH_COMPILER_LANGUAGE)
 		set(CMAKE_PCH_COMPILER_LANGUAGE ${lang})
 	endif()
+
+	# copy compiler settings from existing compiler
 	set(CMAKE_${lang}PCH_COMPILE_OBJECT ${CMAKE_${lang}_COMPILE_OBJECT})
+	set(CMAKE_INCLUDE_FLAG_${lang}PCH ${CMAKE_INCLUDE_FLAG_${lang}})
+	set(CMAKE_INCLUDE_FLAG_SEP_${lang}PCH ${CMAKE_INCLUDE_FLAG_SEP_${lang}})
+
 	if(CMAKE_COMPILER_IS_GNU${lang} OR
 		CMAKE_${lang}_COMPILER_ID STREQUAL "GNU"
 		)
