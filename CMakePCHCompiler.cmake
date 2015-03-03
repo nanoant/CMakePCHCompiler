@@ -69,20 +69,16 @@ function(target_precompiled_header) # target [...] header
 					)
 				# /Yc - create precompiled header
 				# /Fd - specify directory for pdb output
-				set_source_files_properties(
-					${header}
-					PROPERTIES
-					LANGUAGE ${lang}PCH
-					COMPILE_FLAGS "/Yc /Fd${pdb_dir}\\"
-					)
+				set(flags "/Yc /Fd${pdb_dir}\\")
 			else()
-				set_source_files_properties(
-					${header}
-					PROPERTIES
-					LANGUAGE ${lang}PCH
-					COMPILE_FLAGS "-x ${header_type}"
-					)
+				set(flags "-x ${header_type}")
 			endif()
+			set_source_files_properties(
+				${header}
+				PROPERTIES
+				LANGUAGE ${lang}PCH
+				COMPILE_FLAGS ${flags}
+				)
 			add_library(${target}.pch OBJECT ${header})
 			set(pch_target ${target}.pch)
 		endif()
@@ -96,14 +92,11 @@ function(target_precompiled_header) # target [...] header
 			# /Yu - use given include as precompiled header
 			# /Fp - exact location for precompiled header
 			# /FI - force include of precompiled header
-			set_target_properties(${target} PROPERTIES
-				COMPILE_FLAGS "/Yu${win_header} /Fp${win_pch} /FI${win_header}"
-				)
+			set(flags "/Yu${win_header} /Fp${win_pch} /FI${win_header}")
 		else()
-			set_target_properties(${target} PROPERTIES
-				COMPILE_FLAGS "-include ${target_dir}/${header}"
-				)
+			set(flags "-include ${target_dir}/${header}")
 		endif()
+		set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${flags}")
 	endforeach()
 endfunction()
 
