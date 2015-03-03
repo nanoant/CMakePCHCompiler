@@ -27,14 +27,14 @@ Example
 -------
 
 	cmake_minimum_required(VERSION 2.6)
-	
+
 	list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/CMakePCHCompiler)
-	
+
 	project(pchtest CXX CXXPCH)
-	
+
 	add_library(engine SHARED src/engine.cpp src/library.cpp src/prefix.h)
 	target_precompiled_header(engine src/prefix.h)
-	
+
 	add_executable(demo src/demo.cpp)
 	target_link_libraries(demo engine)
 	target_precompiled_header(demo src/prefix.h REUSE engine)
@@ -74,6 +74,33 @@ support using simple API of:
 	                          <path/to/precompiled_header.h>)
 	target_precompiled_header(<target> <path/to/precompiled_header.h> REUSE
 	                          <other_target_to_reuse_precompiled_header_from>)
+
+How does it work?
+-----------------
+
+First, we define new compilers `CPCH` and `CXXPCH` using `CMAKE_<LANG>_*`
+variables. These compilers copy run templates and options from existing `C` and
+`CXX` compilers respectively.
+
+Next we provide `target_precompiled_header` function that enabled precompiled
+header on given target.
+
+Pre-compiler header is build in new `target.pch` subtarget using:
+
+	add_library(${target}.pch OBJECT ${header})
+
+This is done on purpose because of few reasons:
+
+1. *CMake* does not allow to insert source file to existing target once it has
+   been defined.
+
+2. Even if it was possible, we could not ensure precompiled header is built
+   first in main target, but adding it as subtarget we can.
+
+3. We cannot prevent `header.pch`, which is output of `CPCH/CXXPCH` compiler
+   from being linked when it is in part of main target, but if we put it into
+   OBJECT library, then by definition we skip linking process. Also we take the
+   result object to be a recompiled header for main target.
 
 License
 -------
