@@ -97,6 +97,19 @@ function(target_precompiled_header) # target [...] header
 			set(flags "-include ${target_dir}/${header}")
 		endif()
 		set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${flags}")
+
+		if(NOT ARGS_REUSE)
+			list(APPEND CMAKE_PCH_COMPILER_TARGETS ${target})
+			set(CMAKE_PCH_COMPILER_TARGETS
+				"${CMAKE_PCH_COMPILER_TARGETS}"
+				PARENT_SCOPE
+				)
+			list(APPEND CMAKE_PCH_COMPILER_TARGET_FLAGS ${flags})
+			set(CMAKE_PCH_COMPILER_TARGET_FLAGS
+				"${CMAKE_PCH_COMPILER_TARGET_FLAGS}"
+				PARENT_SCOPE
+				)
+		endif()
 	endforeach()
 endfunction()
 
@@ -179,8 +192,48 @@ macro(__define_pch_compiler lang)
 		variable_watch(CMAKE_${lang}_FLAGS_RELEASE        __watch_pch_variable)
 		variable_watch(CMAKE_${lang}_FLAGS_RELWITHDEBINFO __watch_pch_variable)
 	endif()
+
+	# this will be executed in just before makefile generation
+	variable_watch(CMAKE_BACKWARDS_COMPATIBILITY __watch_pch_last_hook)
 endmacro()
 
+# copies all compile definitions, flags and options to .pch subtarget
+function(__watch_pch_last_hook variable access value)
+	list(LENGTH CMAKE_PCH_COMPILER_TARGETS length)
+	foreach(index RANGE -${length} -1)
+		list(GET CMAKE_PCH_COMPILER_TARGETS ${index} target)
+		list(GET CMAKE_PCH_COMPILER_TARGET_FLAGS ${index} flags)
+		if(target)
+			set(pch_target ${target}.pch)
+			foreach(property
+				COMPILE_DEFINITIONS
+				COMPILE_DEFINITIONS_DEBUG
+				COMPILE_DEFINITIONS_MINSIZEREL
+				COMPILE_DEFINITIONS_RELEASE
+				COMPILE_DEFINITIONS_RELWITHDEBINFO
+				COMPILE_FLAGS
+				COMPILE_OPTIONS
+				)
+				get_target_property(value ${target} ${property})
+				# remove compile flags that we inserted by
+				# target_precompiled_header
+				if(property STREQUAL "COMPILE_FLAGS")
+					string(REPLACE "${flags}" "" value "${value}")
+				endif()
+				if(value)
+					set_target_properties(
+						${pch_target}
+						PROPERTIES
+						${property}
+						${value}
+						)
+				endif()
+			endforeach()
+		endif()
+	endforeach()
+endfunction()
+
+# copies all custom compiler settings to PCH compiler
 macro(__watch_pch_variable variable access value)
 	string(REPLACE _C_ _CPCH_ pchvariable ${variable})
 	string(REPLACE _CXX_ _CXXPCH_ pchvariable ${pchvariable})
