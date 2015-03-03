@@ -107,6 +107,13 @@ function(target_precompiled_header) # target [...] header
 		set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${flags}")
 
 		if(NOT ARGS_REUSE)
+			if(NOT DEFINED CMAKE_PCH_COMPILER_TARGETS)
+				# this will be executed in just before makefile generation
+				variable_watch(
+					CMAKE_BACKWARDS_COMPATIBILITY
+					__watch_pch_last_hook
+					)
+			endif()
 			list(APPEND CMAKE_PCH_COMPILER_TARGETS ${target})
 			set(CMAKE_PCH_COMPILER_TARGETS
 				"${CMAKE_PCH_COMPILER_TARGETS}"
@@ -200,44 +207,42 @@ macro(__define_pch_compiler lang)
 		variable_watch(CMAKE_${lang}_FLAGS_RELEASE        __watch_pch_variable)
 		variable_watch(CMAKE_${lang}_FLAGS_RELWITHDEBINFO __watch_pch_variable)
 	endif()
-
-	# this will be executed in just before makefile generation
-	variable_watch(CMAKE_BACKWARDS_COMPATIBILITY __watch_pch_last_hook)
 endmacro()
 
 # copies all compile definitions, flags and options to .pch subtarget
 function(__watch_pch_last_hook variable access value)
+	if(NOT DEFINED CMAKE_PCH_COMPILER_TARGETS)
+		return()
+	endif()
 	list(LENGTH CMAKE_PCH_COMPILER_TARGETS length)
 	foreach(index RANGE -${length} -1)
 		list(GET CMAKE_PCH_COMPILER_TARGETS ${index} target)
 		list(GET CMAKE_PCH_COMPILER_TARGET_FLAGS ${index} flags)
-		if(NOT target STREQUAL "")
-			set(pch_target ${target}.pch)
-			foreach(property
-				COMPILE_DEFINITIONS
-				COMPILE_DEFINITIONS_DEBUG
-				COMPILE_DEFINITIONS_MINSIZEREL
-				COMPILE_DEFINITIONS_RELEASE
-				COMPILE_DEFINITIONS_RELWITHDEBINFO
-				COMPILE_FLAGS
-				COMPILE_OPTIONS
-				)
-				get_target_property(value ${target} ${property})
-				# remove compile flags that we inserted by
-				# target_precompiled_header
-				if(property STREQUAL "COMPILE_FLAGS")
-					string(REPLACE "${flags}" "" value "${value}")
-				endif()
-				if(NOT value STREQUAL "value-NOTFOUND")
-					set_target_properties(
-						"${pch_target}"
-						PROPERTIES
-						"${property}"
-						"${value}"
-						)
-				endif()
-			endforeach()
-		endif()
+		set(pch_target ${target}.pch)
+		foreach(property
+			COMPILE_DEFINITIONS
+			COMPILE_DEFINITIONS_DEBUG
+			COMPILE_DEFINITIONS_MINSIZEREL
+			COMPILE_DEFINITIONS_RELEASE
+			COMPILE_DEFINITIONS_RELWITHDEBINFO
+			COMPILE_FLAGS
+			COMPILE_OPTIONS
+			)
+			get_target_property(value ${target} ${property})
+			# remove compile flags that we inserted by
+			# target_precompiled_header
+			if(property STREQUAL "COMPILE_FLAGS")
+				string(REPLACE "${flags}" "" value "${value}")
+			endif()
+			if(NOT value STREQUAL "value-NOTFOUND")
+				set_target_properties(
+					"${pch_target}"
+					PROPERTIES
+					"${property}"
+					"${value}"
+					)
+			endif()
+		endforeach()
 	endforeach()
 endfunction()
 
