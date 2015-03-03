@@ -211,9 +211,6 @@ endmacro()
 
 # copies all compile definitions, flags and options to .pch subtarget
 function(__watch_pch_last_hook variable access value)
-	if(NOT DEFINED CMAKE_PCH_COMPILER_TARGETS)
-		return()
-	endif()
 	list(LENGTH CMAKE_PCH_COMPILER_TARGETS length)
 	foreach(index RANGE -${length} -1)
 		list(GET CMAKE_PCH_COMPILER_TARGETS ${index} target)
