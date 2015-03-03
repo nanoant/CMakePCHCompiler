@@ -203,7 +203,7 @@ function(__watch_pch_last_hook variable access value)
 	foreach(index RANGE -${length} -1)
 		list(GET CMAKE_PCH_COMPILER_TARGETS ${index} target)
 		list(GET CMAKE_PCH_COMPILER_TARGET_FLAGS ${index} flags)
-		if(target)
+		if(NOT target STREQUAL "")
 			set(pch_target ${target}.pch)
 			foreach(property
 				COMPILE_DEFINITIONS
@@ -220,12 +220,12 @@ function(__watch_pch_last_hook variable access value)
 				if(property STREQUAL "COMPILE_FLAGS")
 					string(REPLACE "${flags}" "" value "${value}")
 				endif()
-				if(value)
+				if(NOT value STREQUAL "value-NOTFOUND")
 					set_target_properties(
-						${pch_target}
+						"${pch_target}"
 						PROPERTIES
-						${property}
-						${value}
+						"${property}"
+						"${value}"
 						)
 				endif()
 			endforeach()
