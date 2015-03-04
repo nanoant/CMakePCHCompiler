@@ -32,7 +32,7 @@ Example
 
 	project(pchtest CXX CXXPCH)
 
-	add_library(engine SHARED src/engine.cpp src/library.cpp src/prefix.h)
+	add_library(engine SHARED src/engine.cpp src/library.cpp)
 	target_precompiled_header(engine src/prefix.h)
 
 	add_executable(demo src/demo.cpp)
