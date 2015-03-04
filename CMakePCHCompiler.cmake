@@ -34,7 +34,8 @@ function(target_precompiled_header) # target [...] header
 	if(NOT MSVC AND
 		NOT CMAKE_COMPILER_IS_GNU${lang} AND
 		NOT CMAKE_${lang}_COMPILER_ID STREQUAL "GNU" AND
-		NOT CMAKE_${lang}_COMPILER_ID STREQUAL "Clang"
+		NOT CMAKE_${lang}_COMPILER_ID STREQUAL "Clang" AND
+		NOT CMAKE_${lang}_COMPILER_ID STREQUAL "AppleClang"
 		)
 		message(WARNING
 			"Precompiled headers not supported for ${CMAKE_${lang}_COMPILER_ID}"
