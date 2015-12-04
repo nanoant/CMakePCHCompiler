@@ -59,7 +59,14 @@ function(target_precompiled_header) # target [...] header
 		endif()
 		if(ARGS_REUSE)
 			set(pch_target ${ARGS_REUSE}.pch)
+			set(target_dir
+				${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
+			)
 		else()
+			set(pch_target ${target}.pch)
+			set(target_dir
+				${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
+			)
 			if(ARGS_TYPE)
 				set(header_type ${ARGS_TYPE})
 			elseif(lang STREQUAL C)
@@ -72,40 +79,54 @@ function(target_precompiled_header) # target [...] header
 			endif()
 			if(MSVC)
 				# ensure pdb goes to the same location, otherwise we get C2859
-				file(TO_NATIVE_PATH
-					"${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${target}.dir"
+				get_filename_component(
 					pdb_dir
+					"${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${target}.dir"
+					ABSOLUTE
 					)
+				get_filename_component(win_pch "${target_dir}/${header}.pch" ABSOLUTE)
+				get_filename_component(win_header "${header}" ABSOLUTE)
 				# /Yc - create precompiled header
+				# /Fp - exact location for precompiled header
 				# /Fd - specify directory for pdb output
-				set(flags "/Yc /Fd${pdb_dir}\\")
+				set(flags "/Yc${win_header} /Fp${win_pch} /Fd${pdb_dir}")
+
+				set_source_files_properties(
+					${header}
+					PROPERTIES
+					LANGUAGE ${lang}
+					COMPILE_FLAGS ${flags}
+					)
+
+				add_library(${pch_target} ${header})
 			else()
 				set(flags "-x ${header_type}")
+				set_source_files_properties(
+					${header}
+					PROPERTIES
+					LANGUAGE ${lang}PCH
+					COMPILE_FLAGS ${flags}
+					)
+				add_library(${pch_target} OBJECT ${header})
 			endif()
-			set_source_files_properties(
-				${header}
-				PROPERTIES
-				LANGUAGE ${lang}PCH
-				COMPILE_FLAGS ${flags}
-				)
-			add_library(${target}.pch OBJECT ${header})
-			set(pch_target ${target}.pch)
 		endif()
+
 		add_dependencies(${target} ${pch_target})
-		set(target_dir
-			${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
-			)
+
 		if(MSVC)
-			get_filename_component(win_header "${header}" NAME)
-			file(TO_NATIVE_PATH "${target_dir}/${header}.pch" win_pch)
+			get_filename_component(win_pch "${target_dir}/${header}.pch" ABSOLUTE)
+			get_filename_component(win_header "${header}" ABSOLUTE)
 			# /Yu - use given include as precompiled header
 			# /Fp - exact location for precompiled header
 			# /FI - force include of precompiled header
-			set(flags "/Yu${win_header} /Fp${win_pch} /FI${win_header}")
+			target_compile_options(
+				"${target}" PUBLIC "/Yu${win_header}" "/Fp${win_pch}" "/FI${win_header}"
+				)
+			target_link_libraries(${target} ${pch_target})
 		else()
 			set(flags "-include ${target_dir}/${header}")
+			set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${flags}")
 		endif()
-		set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${flags}")
 
 		if(NOT ARGS_REUSE)
 			if(NOT DEFINED CMAKE_PCH_COMPILER_TARGETS)
@@ -225,6 +246,8 @@ function(__watch_pch_last_hook variable access value)
 			COMPILE_DEFINITIONS_RELWITHDEBINFO
 			COMPILE_FLAGS
 			COMPILE_OPTIONS
+			INCLUDE_DIRECTORIES
+			CXX_STANDARD
 			)
 			get_target_property(value ${target} ${property})
 			# remove compile flags that we inserted by
@@ -233,12 +256,21 @@ function(__watch_pch_last_hook variable access value)
 				string(REPLACE "${flags}" "" value "${value}")
 			endif()
 			if(NOT value STREQUAL "value-NOTFOUND")
-				set_target_properties(
-					"${pch_target}"
-					PROPERTIES
-					"${property}"
-					"${value}"
-					)
+				if(property STREQUAL "CXX_STANDARD")
+					if(NOT MSVC)
+						target_compile_options(
+							"${pch_target}"
+							PUBLIC "-std=gnu++${value}"
+							)
+					endif()
+				else()
+					set_target_properties(
+						"${pch_target}"
+						PROPERTIES
+						"${property}"
+						"${value}"
+						)
+				endif()
 			endif()
 		endforeach()
 	endforeach()
