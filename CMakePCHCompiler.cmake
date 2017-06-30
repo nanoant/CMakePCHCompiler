@@ -89,7 +89,7 @@ function(target_precompiled_header) # target [...] header
 				# /Yc - create precompiled header
 				# /Fp - exact location for precompiled header
 				# /Fd - specify directory for pdb output
-				set(flags "/Yc${win_header} /Fp${win_pch} /Fd${pdb_dir}")
+				set(flags "/Yc\"${win_header}\" /Fp\"${win_pch}\" /Fd\"${pdb_dir}\"")
 
 				set_source_files_properties(
 					${header}
@@ -120,11 +120,11 @@ function(target_precompiled_header) # target [...] header
 			# /Fp - exact location for precompiled header
 			# /FI - force include of precompiled header
 			target_compile_options(
-				"${target}" PUBLIC "/Yu${win_header}" "/Fp${win_pch}" "/FI${win_header}"
+				"${target}" PUBLIC "/Yu\"${win_header}\"" "/Fp\"${win_pch}\"" "/FI\"${win_header}\""
 				)
 			target_link_libraries(${target} ${pch_target})
 		else()
-			set(flags "-include ${target_dir}/${header}")
+			set(flags "-include \"${target_dir}/${header}\"")
 			set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${flags}")
 		endif()
 
