@@ -67,6 +67,12 @@ function(target_precompiled_header) # target [...] header
 			set(target_dir
 				${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
 				)
+		endif()
+		if(MSVC)
+			get_filename_component(win_pch "${target_dir}/${header}.pch" ABSOLUTE)
+			get_filename_component(win_header "${header}" ABSOLUTE)
+		endif()
+		if(NOT ARGS_REUSE)
 			if(ARGS_TYPE)
 				set(header_type ${ARGS_TYPE})
 			elseif(lang STREQUAL C)
@@ -78,27 +84,17 @@ function(target_precompiled_header) # target [...] header
 				set(header_type "c++-header")
 			endif()
 			if(MSVC)
-				# ensure pdb goes to the same location, otherwise we get C2859
-				get_filename_component(
-					pdb_dir
-					"${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${target}.dir"
-					ABSOLUTE
-					)
-				get_filename_component(win_pch "${target_dir}/${header}.pch" ABSOLUTE)
-				get_filename_component(win_header "${header}" ABSOLUTE)
 				# /Yc - create precompiled header
 				# /Fp - exact location for precompiled header
-				# /Fd - specify directory for pdb output
-				set(flags "/Yc\"${win_header}\" /Fp\"${win_pch}\" /Fd\"${pdb_dir}\"")
-
+				# /FI - force include of precompiled header
+				set(flags "/Yc\"${win_header}\" /Fp\"${win_pch}\" /FI\"${win_header}\"")
 				set_source_files_properties(
 					${header}
 					PROPERTIES
 					LANGUAGE ${lang}
 					COMPILE_FLAGS ${flags}
 					)
-
-				add_library(${pch_target} ${header})
+				add_library(${pch_target} OBJECT ${header})
 			else()
 				set(flags "-x ${header_type}")
 				set_source_files_properties(
@@ -114,19 +110,18 @@ function(target_precompiled_header) # target [...] header
 		add_dependencies(${target} ${pch_target})
 
 		if(MSVC)
-			get_filename_component(win_pch "${target_dir}/${header}.pch" ABSOLUTE)
-			get_filename_component(win_header "${header}" ABSOLUTE)
 			# /Yu - use given include as precompiled header
 			# /Fp - exact location for precompiled header
 			# /FI - force include of precompiled header
+			set(exclude "/Yu${win_header}")
 			target_compile_options(
-				"${target}" PUBLIC "/Yu\"${win_header}\"" "/Fp\"${win_pch}\"" "/FI\"${win_header}\""
+				${target} PRIVATE "/Fp${win_pch}" "/FI${win_header}"
 				)
-			target_link_libraries(${target} PRIVATE ${pch_target})
+			target_sources(${target} PRIVATE $<TARGET_OBJECTS:${pch_target}>)
 		else()
-			set(flags "-include \"${target_dir}/${header}\"")
-			set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${flags}")
+			set(exclude -include ${target_dir}/${header})
 		endif()
+		target_compile_options(${target} PRIVATE ${exclude})
 
 		if(NOT ARGS_REUSE)
 			if(NOT DEFINED CMAKE_PCH_COMPILER_TARGETS)
@@ -141,10 +136,8 @@ function(target_precompiled_header) # target [...] header
 				"${CMAKE_PCH_COMPILER_TARGETS}"
 				PARENT_SCOPE
 				)
-			list(APPEND CMAKE_PCH_COMPILER_TARGET_FLAGS ${flags})
-			set(CMAKE_PCH_COMPILER_TARGET_FLAGS
-				"${CMAKE_PCH_COMPILER_TARGET_FLAGS}"
-				PARENT_SCOPE
+			set_target_properties(${pch_target} PROPERTIES
+				PCH_COMPILER_EXCLUDE "${exclude}"
 				)
 		endif()
 	endforeach()
@@ -247,9 +240,9 @@ function(__watch_pch_last_hook variable access value)
 	endif()
 	foreach(index RANGE -${length} -1)
 		list(GET CMAKE_PCH_COMPILER_TARGETS ${index} target)
-		list(GET CMAKE_PCH_COMPILER_TARGET_FLAGS ${index} flags)
 		set(pch_target ${target}.pch)
 		foreach(property
+			# NOTE: this list is likely incomplete
 			COMPILE_DEFINITIONS
 			COMPILE_DEFINITIONS_DEBUG
 			COMPILE_DEFINITIONS_MINSIZEREL
@@ -258,32 +251,41 @@ function(__watch_pch_last_hook variable access value)
 			COMPILE_FLAGS
 			COMPILE_OPTIONS
 			INCLUDE_DIRECTORIES
-			CXX_STANDARD
+			# commented out items are handled exceptionally:
+			# CXX_STANDARD
+			# POSITION_INDEPENDENT_CODE
+			CXX_STANDARD_REQUIRED
 			)
 			get_target_property(value ${target} ${property})
-			# remove compile flags that we inserted by
-			# target_precompiled_header
-			if(property STREQUAL "COMPILE_FLAGS")
-				string(REPLACE "${flags}" "" value "${value}")
-			endif()
 			if(NOT value STREQUAL "value-NOTFOUND")
-				if(property STREQUAL "CXX_STANDARD")
-					if(NOT MSVC)
-						target_compile_options(
-							"${pch_target}"
-							PUBLIC "-std=gnu++${value}"
-							)
-					endif()
-				else()
-					set_target_properties(
-						"${pch_target}"
-						PROPERTIES
-						"${property}"
-						"${value}"
-						)
-				endif()
+				set_target_properties(${pch_target} PROPERTIES
+					"${property}" "${value}"
+					)
 			endif()
 		endforeach()
+
+		# HACK: remove target_precompiled_header inserted flags
+		get_target_property(exclude ${pch_target} PCH_COMPILER_EXCLUDE)
+		get_target_property(value ${pch_target} COMPILE_OPTIONS)
+		string(REPLACE "${exclude}" "" value "${value}")
+		set_target_properties(${pch_target} PROPERTIES
+			COMPILE_OPTIONS "${value}"
+			)
+
+		# difficult cases
+		if(NOT MSVC)
+			get_target_property(value "${target}" CXX_STANDARD)
+			if(value)
+				target_compile_options("${pch_target}" PRIVATE
+					-std=gnu++${value}
+					)
+			endif()
+			# NOTE: setting POSITION_INDEPENDENT_CODE here has no effect
+			get_target_property(value "${target}" POSITION_INDEPENDENT_CODE)
+			if(value AND NOT CYGWIN)
+				target_compile_options("${pch_target}" PRIVATE -fPIC)
+			endif()
+		endif()
 	endforeach()
 endfunction()
 
