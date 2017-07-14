@@ -208,27 +208,28 @@ macro(__define_pch_compiler lang)
 	endif()
 
 	# copy all initial settings for C/CXXPCH from C/CXX & watch them
+	# NOTE: marking INTERNAL instead of STRING, so these do not appear in cmake-gui
 	set(CMAKE_${lang}PCH_FLAGS "${CMAKE_${lang}_FLAGS_INIT}"
-		CACHE STRING
+		CACHE INTERNAL #STRING
 		"Flags used by the compiler during all build types."
 		)
 	variable_watch(CMAKE_${lang}_FLAGS __watch_pch_variable)
 
 	if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 		set(CMAKE_${lang}PCH_FLAGS_DEBUG "${CMAKE_${lang}_FLAGS_DEBUG_INIT}"
-			CACHE STRING
+			CACHE INTERNAL #STRING
 			"Flags used by the compiler during debug builds."
 			)
 		set(CMAKE_${lang}PCH_FLAGS_MINSIZEREL "${CMAKE_${lang}_FLAGS_MINSIZEREL_INIT}"
-			CACHE STRING
+			CACHE INTERNAL #STRING
 			"Flags used by the compiler during release builds for minimum size."
 			)
 		set(CMAKE_${lang}PCH_FLAGS_RELEASE "${CMAKE_${lang}_FLAGS_RELEASE_INIT}"
-			CACHE STRING
+			CACHE INTERNAL #STRING
 			"Flags used by the compiler during release builds."
 			)
 		set(CMAKE_${lang}PCH_FLAGS_RELWITHDEBINFO "${CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT}"
-			CACHE STRING
+			CACHE INTERNAL #STRING
 			"Flags used by the compiler during release builds with debug info."
 			)
 		variable_watch(CMAKE_${lang}_FLAGS_DEBUG          __watch_pch_variable)
