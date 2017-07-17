@@ -122,7 +122,7 @@ function(target_precompiled_header) # target [...] header
 			target_compile_options(
 				"${target}" PUBLIC "/Yu\"${win_header}\"" "/Fp\"${win_pch}\"" "/FI\"${win_header}\""
 				)
-			target_link_libraries(${target} ${pch_target})
+			target_link_libraries(${target} PRIVATE ${pch_target})
 		else()
 			set(flags "-include \"${target_dir}/${header}\"")
 			set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${flags}")
