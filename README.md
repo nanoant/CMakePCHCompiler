@@ -24,6 +24,11 @@ Supported & tested platforms
 3. *OSX* with `Clang`, `GCC`, tested on *OSX 10.10* & *Xcode 6.1*
 4. *Linux* with `GCC`, tested on *Ubuntu 14.04 LTS* & *GCC 4.8*
 
+Note for MSVC users
+-------------------
+
+Due to the problem in MSVC 2010 Microsoft.Cpp.Win32.targets and higher deleting PCH this module enforces `/Z7` compiler flag, hence debug information is stored on `.obj` files instead of `.pdb` program database. This is certainly not a perfect solution, but only one that is known to work so far. If you know any better workaround please submit PR. Thanks!
+
 Example
 -------
 

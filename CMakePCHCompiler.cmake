@@ -198,6 +198,12 @@ macro(__define_pch_compiler lang)
 			CMAKE_${lang}PCH_COMPILE_OBJECT
 			${CMAKE_${lang}PCH_COMPILE_OBJECT}
 			)
+		# force /Z7 for MSVC2010 and forward to make it work,
+		# as with /Zi Microsoft.Cpp.Win32.targets deletes the PCH file
+		string(APPEND CMAKE_${lang}_FLAGS_DEBUG " /Z7")
+		string(APPEND CMAKE_${lang}PCH_FLAGS_DEBUG " /Z7")
+		string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO " /Z7")
+		string(APPEND CMAKE_${lang}PCH_FLAGS_RELWITHDEBINFO " /Z7")
 	endif()
 
 	# copy all initial settings for C/CXXPCH from C/CXX & watch them
