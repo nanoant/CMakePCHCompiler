@@ -174,9 +174,15 @@ macro(__define_pch_compiler lang)
 
 	# setup compiler & platform specific flags same way C/CXX does
 	if(CMAKE_${lang}_COMPILER_ID)
-		include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_${lang}_COMPILER_ID}-${lang}PCH
-			OPTIONAL
-			)
+		if(CMAKE_VERSION VERSION_LESS 3.12)
+			include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_${lang}_COMPILER_ID}-${lang}PCH
+				OPTIONAL
+				)
+		else()
+			include(Platform/${CMAKE_EFFECTIVE_SYSTEM_NAME}-${CMAKE_${lang}_COMPILER_ID}-${lang}PCH
+				OPTIONAL
+				)
+		endif()
 	endif()
 
 	# just use all settings from C/CXX compiler
