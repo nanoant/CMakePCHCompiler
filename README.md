@@ -19,14 +19,15 @@ Also header may be given different type that default `c++-header`.
 Supported & tested platforms
 ----------------------------
 
-1. *Windows* with `MSVC`, tested on *VS2015*
-2. *OSX* with `Clang`, `GCC`, tested on *OSX 10.10* & *Xcode 6.1*
-3. *Linux* with `GCC`, tested on *Ubuntu 14.04 LTS* & *GCC 4.8*
+1. *CMake* version 3.0 or higher
+2. *Windows* with `MSVC`, tested on *VS2015*
+3. *OSX* with `Clang`, `GCC`, tested on *OSX 10.10* & *Xcode 6.1*
+4. *Linux* with `GCC`, tested on *Ubuntu 14.04 LTS* & *GCC 4.8*
 
 Example
 -------
 
-	cmake_minimum_required(VERSION 2.6)
+	cmake_minimum_required(VERSION 3.0)
 
 	list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/CMakePCHCompiler)
 

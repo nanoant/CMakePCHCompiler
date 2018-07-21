@@ -61,12 +61,12 @@ function(target_precompiled_header) # target [...] header
 			set(pch_target ${ARGS_REUSE}.pch)
 			set(target_dir
 				${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
-			)
+				)
 		else()
 			set(pch_target ${target}.pch)
 			set(target_dir
 				${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
-			)
+				)
 			if(ARGS_TYPE)
 				set(header_type ${ARGS_TYPE})
 			elseif(lang STREQUAL C)
