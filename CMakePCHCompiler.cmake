@@ -22,9 +22,8 @@
 # project(project_name C CPCH)     # plain C project
 # project(project_name CXX CXXPCH) # C++ project
 
-# Author: Adam Strzelecki <ono@java.pl>
-# Copyright (c) 2014-2015 Adam Strzelecki. All rights reserved.
-# This code is licensed under the MIT License, see README.md.
+# Copyright (c) CMakePCHCompiler Authors. All rights reserved.
+# This code is licensed under the MIT License, see LICENSE.
 
 include(CMakeParseArguments)
 

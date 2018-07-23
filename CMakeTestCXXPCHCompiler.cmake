@@ -1,8 +1,7 @@
 # Precompiled Header creation for C++
 #
-# Author: Adam Strzelecki <ono@java.pl>
-# Copyright (c) 2014-2015 Adam Strzelecki. All rights reserved.
-# This code is licensed under the MIT License, see README.md.
+# Copyright (c) CMakePCHCompiler Authors. All rights reserved.
+# This code is licensed under the MIT License, see LICENSE.
 #
 # Just set the compiler works.
 
