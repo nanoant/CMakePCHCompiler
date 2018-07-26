@@ -46,11 +46,10 @@ Note for MSVC users
 
 Due to the problem in MSVC 2010 and higher's `Microsoft.Cpp.Win32.targets` deleting PCH, this module currently enforces `/Z7` compiler flag for MSVC, hence debug information is stored on `.obj` files instead of `.pdb` program database. This is certainly not a perfect solution, but only one that is known to work so far. If you know any better workaround please submit PR. Thanks!
 
-[z7vscomm]: https://developercommunity.visualstudio.com/content/
-problem/15171/shared-precompiled-header-gots-deleted-during-buil.html
+[z7vscomm]: https://developercommunity.visualstudio.com/content/problem/15171/shared-precompiled-header-gots-deleted-during-buil.html
 [z7issue]: https://github.com/nanoant/CMakePCHCompiler/issues/21
 
-More information can be found at [Visual Studio Community][z7vscomm] and is tracked at issue #21.
+More information can be found at [Visual Studio Community][z7vscomm] and is tracked at [issue #21][z7issue].
 
 Example
 -------
