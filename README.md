@@ -1,7 +1,7 @@
 CMake Precompiled Headers
 =========================
 
-This module defines extra CXXPCH compiler that compiles `.h` into `.pch/.gch`.
+CMakePCHCompiler module defines extra CXXPCH compiler that compiles `.h` into `.pch/.gch`.
 
 For convenience it defines
 
@@ -15,6 +15,23 @@ Optionally it may share compiled header object with other target, so it is
 precompiled just once.
 
 Also header may be given different type that default `c++-header`.
+
+Why this project exists
+-----------------------
+
+[rfc]: http://thread.gmane.org/gmane.comp.programming.tools.cmake.devel/12589
+
+So far, native support for precompiled headers was requested at CMake's mailing lists and/or its issue tracker many times, however until today CMake does not provide PCH support. This project was started in 2015 as a proof-of-concept implementation accompanying [RFC: CMake precompiled header support and custom compiler based implementation][rfc].
+
+**NOTE:** This project was and is neither trying to be official nor proper way to provide PCH support in CMake. Only viable and future-proof solution should be implemented natively in CMake. CMakePCHCompiler authors are not affiliated with KitWare (CMake's authors).
+
+[pchnativepr]: https://gitlab.kitware.com/cmake/cmake/merge_requests/984
+
+Recently there was an [effort for such a native implementation][pchnativepr], but this has not been finalized and later discarded. Therefore this project is meant to be maintained until native implementation will arrive to CMake.
+
+[pchissue]: https://gitlab.kitware.com/cmake/cmake/issues/1260
+
+See also an [umbrella issue at CMake's issue tracker][pchissue] (KitWare's GitLab) for more information on native PCH support.
 
 Supported & tested platforms
 ----------------------------
