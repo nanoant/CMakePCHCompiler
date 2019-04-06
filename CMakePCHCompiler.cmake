@@ -106,6 +106,9 @@ function(target_precompiled_header) # target [...] header
 			endif()
 		endif()
 
+		get_target_property(target_libraries ${target} LINK_LIBRARIES)
+		set_target_properties(${pch_target} PROPERTIES LINK_LIBRARIES "${target_libraries}")
+
 		add_dependencies(${target} ${pch_target})
 
 		if(MSVC)
