@@ -104,10 +104,9 @@ function(target_precompiled_header) # target [...] header
 					)
 				add_library(${pch_target} OBJECT ${header})
 			endif()
+			get_target_property(target_libraries ${target} LINK_LIBRARIES)
+			set_target_properties(${pch_target} PROPERTIES LINK_LIBRARIES "${target_libraries}")
 		endif()
-
-		get_target_property(target_libraries ${target} LINK_LIBRARIES)
-		set_target_properties(${pch_target} PROPERTIES LINK_LIBRARIES "${target_libraries}")
 
 		add_dependencies(${target} ${pch_target})
 
