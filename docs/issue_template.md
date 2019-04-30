@@ -6,7 +6,7 @@ I have read README.md and I have already requested support for precompiled heade
 
 Minimal `CMakeLists.txt` example reproducing bug or showing requested feature:
 
-~~~CMakeLists
+~~~cmake
 cmake_minimum_required(VERSION 3.0)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/CMakePCHCompiler)
