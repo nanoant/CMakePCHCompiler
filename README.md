@@ -1,7 +1,7 @@
 CMake Precompiled Headers
 =========================
 
-CMakePCHCompiler module defines extra CXXPCH compiler that compiles `.h` into `.pch/.gch`.
+CMakePCHCompiler module defines extra `CXXPCH`/`CPCH` "meta"-compiler that compiles `.h` into `.pch/.gch` using existing `CXX`/`C` compiler.
 
 For convenience it defines
 
@@ -11,10 +11,18 @@ For convenience it defines
 
 Uses given header as precompiled header for given target.
 
-Optionally it may share compiled header object with other target, so it is
-precompiled just once.
+Optionally it may share compiled header object with other target, so it is precompiled just once.
 
-Also header may be given different type that default `c++-header`.
+**IMPORTANT** Before you submit issue report or feature request, please...
+--------------------------------------------------------------------------
+
+[pchissue]: https://gitlab.kitware.com/cmake/cmake/issues/1260
+
+1. Read this `README.md` file completely to understand intentions of this project. 
+2. Understand that CMakePCHCompiler is neither official nor proper way to provide PCH support in CMake.
+3. Request first proper precompiled headers support from CMake's maintainers, adding your comment in [dedicated issue at CMake's issue tracker][pchissue].
+4. Understand that the CMakePCHCompiler authors are neither compensated for their efforts not affiliated with KitWare (CMake's authors).
+5. If you know or think you know how to fix / extend CMakePCHCompiler, try to provide PR.
 
 Why this project exists
 -----------------------
@@ -28,8 +36,6 @@ So far, native support for precompiled headers was requested at CMake's mailing 
 [pchnativepr]: https://gitlab.kitware.com/cmake/cmake/merge_requests/984
 
 Recently there was an [effort for such a native implementation][pchnativepr], but this has not been finalized and later discarded. Therefore this project is meant to be maintained until native implementation will arrive to CMake.
-
-[pchissue]: https://gitlab.kitware.com/cmake/cmake/issues/1260
 
 See also an [umbrella issue at CMake's issue tracker][pchissue] (KitWare's GitLab) for more information on native PCH support.
 
