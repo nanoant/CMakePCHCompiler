@@ -1,0 +1,13 @@
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.ninja
+.ninja*
+demo
+*.exe
+*.so
+*.a
+*.dylib
+*.lib
+*.dll
