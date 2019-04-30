@@ -18,7 +18,7 @@ Optionally it may share compiled header object with other target, so it is preco
 
 [pchissue]: https://gitlab.kitware.com/cmake/cmake/issues/1260
 
-1. Read this `README.md` file completely to understand intentions of this project. 
+1. Read this `README.md` file completely to understand intentions of this project.
 2. Understand that CMakePCHCompiler is neither official nor proper way to provide PCH support in CMake.
 3. Request first proper precompiled headers support from CMake's maintainers, adding your comment in [dedicated issue at CMake's issue tracker][pchissue].
 4. Understand that the CMakePCHCompiler authors are neither compensated for their efforts not affiliated with KitWare (CMake's authors).
