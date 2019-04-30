@@ -67,8 +67,10 @@ function(target_precompiled_header) # target [...] header
 				${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
 				)
 		endif()
+		__compute_pch_build_path(header_build_path "${header}")
+		set(target_dir_header "${target_dir}/${header_build_path}")
 		if(MSVC)
-			get_filename_component(win_pch "${target_dir}/${header}.pch" ABSOLUTE)
+			get_filename_component(win_pch "${target_dir_header}.pch" ABSOLUTE)
 			get_filename_component(win_header "${header}" ABSOLUTE)
 		endif()
 		if(NOT ARGS_REUSE)
@@ -120,7 +122,7 @@ function(target_precompiled_header) # target [...] header
 				)
 			target_sources(${target} PRIVATE $<TARGET_OBJECTS:${pch_target}>)
 		else()
-			set(exclude -include ${target_dir}/${header})
+			set(exclude -include ${target_dir_header})
 		endif()
 		target_compile_options(${target} PRIVATE ${exclude})
 
@@ -331,3 +333,25 @@ macro(__configure_pch_compiler lang)
 		${CMAKE_PLATFORM_INFO_DIR}/CMake${lang}PCHCompiler.cmake
 		)
 endmacro()
+
+# replicates behavior of cmLocalGenerator::GetObjectFileNameWithoutTarget
+# derived from CMake source code FindCUDA.cmake module
+function(__compute_pch_build_path build_path path)
+	get_filename_component(bpath "${path}" ABSOLUTE)
+	string(FIND "${bpath}" "${CMAKE_CURRENT_BINARY_DIR}" _binary_dir_pos)
+	string(FIND "${bpath}" "${CMAKE_CURRENT_SOURCE_DIR}" _source_dir_pos)
+	# cmLocalGenerator::GetObjectFileNameWithoutTarget
+	# cmStateDirectory::ConvertToRelPathIfNotContained
+	# cmStateDirectory::ContainsBoth
+	if (_binary_dir_pos EQUAL 0)
+		file(RELATIVE_PATH bpath "${CMAKE_CURRENT_BINARY_DIR}" "${bpath}")
+	elseif(_source_dir_pos EQUAL 0)
+		file(RELATIVE_PATH bpath "${CMAKE_CURRENT_SOURCE_DIR}" "${bpath}")
+	endif()
+	# cmLocalGenerator::CreateSafeUniqueObjectFileName
+	string(REGEX REPLACE "^[/]+" "" bpath "${bpath}")
+	string(REPLACE ":" "_" bpath "${bpath}")
+	string(REPLACE "../" "__/" bpath "${bpath}")
+	string(REPLACE " " "_" bpath "${bpath}")
+	set(${build_path} "${bpath}" PARENT_SCOPE)
+endfunction()
