@@ -60,18 +60,20 @@ More information can be found at [Visual Studio Community][z7vscomm] and is trac
 Example
 -------
 
-	cmake_minimum_required(VERSION 3.0)
+~~~cmake
+cmake_minimum_required(VERSION 3.0)
 
-	list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/CMakePCHCompiler)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/CMakePCHCompiler)
 
-	project(pchtest CXX CXXPCH)
+project(pchtest CXX CXXPCH)
 
-	add_library(engine SHARED src/engine.cpp src/library.cpp)
-	target_precompiled_header(engine src/prefix.h)
+add_library(engine SHARED src/engine.cpp src/library.cpp)
+target_precompiled_header(engine src/prefix.h)
 
-	add_executable(demo src/demo.cpp)
-	target_link_libraries(demo engine)
-	target_precompiled_header(demo src/prefix.h REUSE engine)
+add_executable(demo src/demo.cpp)
+target_link_libraries(demo engine)
+target_precompiled_header(demo src/prefix.h REUSE engine)
+~~~
 
 What it is about?
 -----------------
@@ -103,11 +105,13 @@ should handle precompiled headers generation internally, based on given
 compiler command templates. However this may be good start to request native
 support using simple API of:
 
-	target_precompiled_header(<target> <path/to/precompiled_header.h>)
-	target_precompiled_header(<target1> <target2>
-	                          <path/to/precompiled_header.h>)
-	target_precompiled_header(<target> <path/to/precompiled_header.h> REUSE
-	                          <other_target_to_reuse_precompiled_header_from>)
+~~~cmake
+target_precompiled_header(<target> <path/to/precompiled_header.h>)
+target_precompiled_header(<target1> <target2>
+                          <path/to/precompiled_header.h>)
+target_precompiled_header(<target> <path/to/precompiled_header.h> REUSE
+                          <other_target_to_reuse_precompiled_header_from>)
+~~~
 
 How does it work?
 -----------------
@@ -121,7 +125,9 @@ header on given target.
 
 Pre-compiler header is build in new `target.pch` subtarget using:
 
-	add_library(${target}.pch OBJECT ${header})
+~~~cmake
+add_library(${target}.pch OBJECT ${header})
+~~~
 
 This is done on purpose because of few reasons:
 
