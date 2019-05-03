@@ -161,6 +161,30 @@ macro(__define_pch_compiler lang)
 	set(CMAKE_INCLUDE_FLAG_SEP_${lang}PCH ${CMAKE_INCLUDE_FLAG_SEP_${lang}})
 	set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang}PCH ${CMAKE_INCLUDE_SYSTEM_FLAG_${lang}})
 
+	# copy compiler compile options from existing compiler definition
+	foreach(property
+		# NOTE: this list is likely incomplete
+		_COMPILE_OPTIONS_PIC
+		_COMPILE_OPTIONS_PIE
+		98_STANDARD_COMPILE_OPTION
+		98_EXTENSION_COMPILE_OPTION
+		11_STANDARD_COMPILE_OPTION
+		11_EXTENSION_COMPILE_OPTION
+		14_STANDARD_COMPILE_OPTION
+		14_EXTENSION_COMPILE_OPTION
+		17_STANDARD_COMPILE_OPTION
+		17_EXTENSION_COMPILE_OPTION
+		20_STANDARD_COMPILE_OPTION
+		20_EXTENSION_COMPILE_OPTION
+		)
+		if(DEFINED CMAKE_${lang}${property})
+			set(CMAKE_${lang}PCH${property} "${CMAKE_${lang}${property}}")
+		endif()
+	endforeach()
+
+	# necessary to enable C/C++ standard compile flags
+	set(CMAKE_${lang}PCH_STANDARD_DEFAULT "${CMAKE_${lang}PCH_STANDARD_COMPUTED_DEFAULT}")
+
 	if(CMAKE_COMPILER_IS_GNU${lang} OR
 		CMAKE_${lang}_COMPILER_ID STREQUAL "GNU"
 		)
@@ -260,13 +284,17 @@ function(__watch_pch_last_hook variable access value)
 			COMPILE_FLAGS
 			COMPILE_OPTIONS
 			INCLUDE_DIRECTORIES
-			# commented out items are handled exceptionally:
-			# CXX_STANDARD
-			# POSITION_INDEPENDENT_CODE
+			CXX_STANDARD
 			CXX_STANDARD_REQUIRED
+			CXX_EXTENSIONS
+			C_STANDARD
+			C_STANDARD_REQUIRED
+			C_EXTENSIONS
+			POSITION_INDEPENDENT_CODE
 			)
 			get_target_property(value ${target} ${property})
 			if(NOT value STREQUAL "value-NOTFOUND")
+				string(REGEX REPLACE "(^|_)(C|CXX)(_|$)" "\\1\\2PCH\\3" property "${property}")
 				set_target_properties(${pch_target} PROPERTIES
 					"${property}" "${value}"
 					)
@@ -280,21 +308,6 @@ function(__watch_pch_last_hook variable access value)
 		set_target_properties(${pch_target} PROPERTIES
 			COMPILE_OPTIONS "${value}"
 			)
-
-		# difficult cases
-		if(NOT MSVC)
-			get_target_property(value "${target}" CXX_STANDARD)
-			if(value)
-				target_compile_options("${pch_target}" PRIVATE
-					-std=gnu++${value}
-					)
-			endif()
-			# NOTE: setting POSITION_INDEPENDENT_CODE here has no effect
-			get_target_property(value "${target}" POSITION_INDEPENDENT_CODE)
-			if(value AND NOT CYGWIN)
-				target_compile_options("${pch_target}" PRIVATE -fPIC)
-			endif()
-		endif()
 	endforeach()
 endfunction()
 
