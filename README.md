@@ -31,7 +31,7 @@ For more details how to use precompiled header with your library and/or compiler
 Why this project exists
 -----------------------
 
-[rfc]: http://thread.gmane.org/gmane.comp.programming.tools.cmake.devel/12589
+[rfc]: https://cmake.org/pipermail/cmake-developers/2015-February/024598.html
 
 So far, native support for precompiled headers was requested at CMake's mailing lists and/or its issue tracker many times, however until today CMake does not provide PCH support. This project was started in 2015 as a proof-of-concept implementation accompanying [RFC: CMake precompiled header support and custom compiler based implementation][rfc].
 
