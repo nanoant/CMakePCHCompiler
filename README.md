@@ -13,6 +13,10 @@ Uses given header as precompiled header for given target.
 
 Optionally it may share compiled header object with other target, so it is precompiled just once.
 
+**NOTE**: While CMakePCHCompiler ensures that precompiled header is included as first compile unit for each source file, it is still recommended to keep `#include "prefix.h"` in your source code to ensure your code remains portable regardless of precompiled headers being enabled or not.
+
+For more details how to use precompiled header with your library and/or compiler refer to their documentation i.e. GCC, Qt, etc.
+
 **IMPORTANT** Before you submit issue report or feature request, please...
 --------------------------------------------------------------------------
 
