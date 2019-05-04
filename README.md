@@ -151,6 +151,6 @@ License
 
 [authors]: https://github.com/nanoant/CMakePCHCompiler/graphs/contributors
 
-Copyright (c) 2015-2018 [CMakePCHCompiler Authors][authors]
+Copyright (c) 2015-2019 [CMakePCHCompiler Authors][authors]
 
 This code is licensed under the MIT License, see [LICENSE](LICENSE) for details.
