@@ -4,6 +4,7 @@ cmake_install.cmake
 Makefile
 *.ninja
 .ninja*
+*_autogen/
 demo
 *.exe
 *.so

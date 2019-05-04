@@ -164,6 +164,11 @@ macro(__define_pch_compiler lang)
 	# copy compiler compile options from existing compiler definition
 	foreach(property
 		# NOTE: this list is likely incomplete
+		_VERBOSE_FLAG
+		_SYSROOT_FLAG
+		_OSX_DEPLOYMENT_TARGET_FLAG
+		_SYSTEM_FRAMEWORK_SEARCH_FLAG
+		_FRAMEWORK_SEARCH_FLAG
 		_COMPILE_OPTIONS_PIC
 		_COMPILE_OPTIONS_PIE
 		98_STANDARD_COMPILE_OPTION
