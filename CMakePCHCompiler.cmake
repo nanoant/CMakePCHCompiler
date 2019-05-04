@@ -124,7 +124,13 @@ function(target_precompiled_header) # target [...] header
 		else()
 			set(exclude -include ${target_dir_header})
 		endif()
-		target_compile_options(${target} PRIVATE ${exclude})
+
+		if(CMAKE_VERSION VERSION_LESS 3.3)
+			target_compile_options(${target} PRIVATE "${exclude}")
+		else()
+			# insert precompiled header as first compile unit only for selected language
+			target_compile_options(${target} PRIVATE "$<$<COMPILE_LANGUAGE:${lang}>:${exclude}>")
+		endif()
 
 		if(NOT ARGS_REUSE)
 			if(NOT DEFINED CMAKE_PCH_COMPILER_TARGETS)
