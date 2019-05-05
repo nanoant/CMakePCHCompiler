@@ -1,8 +1,6 @@
-# git sc -xdf && cmake . -DCMAKE_PREFIX_PATH=/Applications/Qt/5.9.7/clang_64/lib/cmake && make VERBOSE=1
+cmake_minimum_required(VERSION 3.0)
 
-cmake_minimum_required(VERSION 2.8.11)
-
-# Enabling C++11 via this does not work with CMakePCHCompiler,
+# Enabling C++11 via CMAKE_CXX_STANDARD does not work with CMakePCHCompiler,
 # use set_target_properties CXX_STANDARD instead.
 # set(CMAKE_CXX_STANDARD 11)
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
