@@ -371,21 +371,21 @@ endmacro()
 # replicates behavior of cmLocalGenerator::GetObjectFileNameWithoutTarget
 # derived from CMake source code FindCUDA.cmake module
 function(__compute_pch_build_path build_path path)
-	get_filename_component(bpath "${path}" ABSOLUTE)
-	string(FIND "${bpath}" "${CMAKE_CURRENT_BINARY_DIR}" _binary_dir_pos)
-	string(FIND "${bpath}" "${CMAKE_CURRENT_SOURCE_DIR}" _source_dir_pos)
+	get_filename_component(path "${path}" ABSOLUTE)
+	string(FIND "${path}" "${CMAKE_CURRENT_BINARY_DIR}" binary_dir_pos)
+	string(FIND "${path}" "${CMAKE_CURRENT_SOURCE_DIR}" source_dir_pos)
 	# cmLocalGenerator::GetObjectFileNameWithoutTarget
 	# cmStateDirectory::ConvertToRelPathIfNotContained
 	# cmStateDirectory::ContainsBoth
-	if (_binary_dir_pos EQUAL 0)
-		file(RELATIVE_PATH bpath "${CMAKE_CURRENT_BINARY_DIR}" "${bpath}")
-	elseif(_source_dir_pos EQUAL 0)
-		file(RELATIVE_PATH bpath "${CMAKE_CURRENT_SOURCE_DIR}" "${bpath}")
+	if(binary_dir_pos EQUAL 0)
+		file(RELATIVE_PATH path "${CMAKE_CURRENT_BINARY_DIR}" "${path}")
+	elseif(source_dir_pos EQUAL 0)
+		file(RELATIVE_PATH path "${CMAKE_CURRENT_SOURCE_DIR}" "${path}")
 	endif()
 	# cmLocalGenerator::CreateSafeUniqueObjectFileName
-	string(REGEX REPLACE "^[/]+" "" bpath "${bpath}")
-	string(REPLACE ":" "_" bpath "${bpath}")
-	string(REPLACE "../" "__/" bpath "${bpath}")
-	string(REPLACE " " "_" bpath "${bpath}")
-	set(${build_path} "${bpath}" PARENT_SCOPE)
+	string(REGEX REPLACE "^[/]+" "" path "${path}")
+	string(REPLACE ":" "_" path "${path}")
+	string(REPLACE "../" "__/" path "${path}")
+	string(REPLACE " " "_" path "${path}")
+	set(${build_path} "${path}" PARENT_SCOPE)
 endfunction()
