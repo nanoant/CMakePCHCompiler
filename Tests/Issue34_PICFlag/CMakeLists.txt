@@ -7,7 +7,5 @@ project(pchtest CXX CXXPCH)
 add_executable(demo src/demo.cpp)
 target_precompiled_header(demo src/prefix.h)
 set_target_properties(demo PROPERTIES
-	CXX_STANDARD 11
-	CXX_STANDARD_REQUIRED YES
-	CXX_EXTENSIONS NO
+	POSITION_INDEPENDENT_CODE YES
 	)
