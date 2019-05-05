@@ -21,3 +21,12 @@ Or older CMake (such as 3.0 - oldest supported):
 ~~~bash
 git clean -xdf . && /Applications/CMake/CMake-3.0.1.app/Contents/bin/cmake . && make VERBOSE=1
 ~~~
+
+Testing on Windows
+------------------
+
+Using PowerShell, each test case should be compiled with:
+
+~~~powershell
+git clean -xdf .; cmake .; cmake --build .
+~~~
