@@ -81,6 +81,7 @@ function(target_precompiled_header) # target [...] header
 			get_filename_component(abs_header "${header}" ABSOLUTE)
 		endif()
 
+		# add precompiled header creation flags to PCH target
 		if(NOT ARGS_REUSE)
 			if(ARGS_TYPE)
 				set(header_type ${ARGS_TYPE})
@@ -120,24 +121,25 @@ function(target_precompiled_header) # target [...] header
 
 		add_dependencies(${target} ${pch_target})
 
+		# add precompiled header insertion flags to regular target
 		if(MSVC)
 			# /Yu - use given include as precompiled header
 			# /Fp - exact location for precompiled header
 			# /FI - force include of precompiled header
-			set(exclude "/Yu${abs_header}")
+			set(flags "/Yu${abs_header}")
 			target_compile_options(
 				${target} PRIVATE "/Fp${abs_pch}" "/FI${abs_header}"
 				)
 			target_sources(${target} PRIVATE $<TARGET_OBJECTS:${pch_target}>)
 		else()
-			set(exclude -include ${target_dir_header})
+			set(flags -include ${target_dir_header})
 		endif()
 
 		if(CMAKE_VERSION VERSION_LESS 3.3)
-			target_compile_options(${target} PRIVATE "${exclude}")
+			target_compile_options(${target} PRIVATE "${flags}")
 		else()
 			# insert precompiled header as first compile unit only for selected language
-			target_compile_options(${target} PRIVATE "$<$<COMPILE_LANGUAGE:${lang}>:${exclude}>")
+			target_compile_options(${target} PRIVATE "$<$<COMPILE_LANGUAGE:${lang}>:${flags}>")
 		endif()
 
 		if(NOT ARGS_REUSE)
@@ -154,7 +156,7 @@ function(target_precompiled_header) # target [...] header
 				PARENT_SCOPE
 				)
 			set_target_properties(${pch_target} PROPERTIES
-				PCH_COMPILER_EXCLUDE "${exclude}"
+				PCH_COMPILER_EXCLUDE "${flags}"
 				)
 		endif()
 
