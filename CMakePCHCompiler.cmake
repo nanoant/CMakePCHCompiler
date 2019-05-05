@@ -77,8 +77,8 @@ function(target_precompiled_header) # target [...] header
 		set(target_dir_header "${target_dir}/${header_build_path}")
 
 		if(MSVC)
-			get_filename_component(win_pch "${target_dir_header}.pch" ABSOLUTE)
-			get_filename_component(win_header "${header}" ABSOLUTE)
+			get_filename_component(abs_pch "${target_dir_header}.pch" ABSOLUTE)
+			get_filename_component(abs_header "${header}" ABSOLUTE)
 		endif()
 
 		if(NOT ARGS_REUSE)
@@ -96,7 +96,7 @@ function(target_precompiled_header) # target [...] header
 				# /Yc - create precompiled header
 				# /Fp - exact location for precompiled header
 				# /FI - force include of precompiled header
-				set(flags "/Yc\"${win_header}\" /Fp\"${win_pch}\" /FI\"${win_header}\"")
+				set(flags "/Yc\"${abs_header}\" /Fp\"${abs_pch}\" /FI\"${abs_header}\"")
 				set_source_files_properties(
 					${header}
 					PROPERTIES
@@ -124,9 +124,9 @@ function(target_precompiled_header) # target [...] header
 			# /Yu - use given include as precompiled header
 			# /Fp - exact location for precompiled header
 			# /FI - force include of precompiled header
-			set(exclude "/Yu${win_header}")
+			set(exclude "/Yu${abs_header}")
 			target_compile_options(
-				${target} PRIVATE "/Fp${win_pch}" "/FI${win_header}"
+				${target} PRIVATE "/Fp${abs_pch}" "/FI${abs_header}"
 				)
 			target_sources(${target} PRIVATE $<TARGET_OBJECTS:${pch_target}>)
 		else()
