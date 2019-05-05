@@ -30,6 +30,7 @@ include(CMakeParseArguments)
 function(target_precompiled_header) # target [...] header
                                     # [REUSE reuse_target] [TYPE type]
 	set(lang ${CMAKE_PCH_COMPILER_LANGUAGE})
+
 	if(NOT MSVC AND
 		NOT CMAKE_COMPILER_IS_GNU${lang} AND
 		NOT CMAKE_${lang}_COMPILER_ID STREQUAL "GNU" AND
@@ -41,6 +42,7 @@ function(target_precompiled_header) # target [...] header
 			)
 		return()
 	endif()
+
 	cmake_parse_arguments(ARGS "" "REUSE;TYPE" "" ${ARGN})
 	if(ARGS_SHARED)
 		set(ARGS_REUSE ${ARGS_SHARED})
@@ -51,11 +53,14 @@ function(target_precompiled_header) # target [...] header
 		message(SEND_ERROR "Re-use target \"${ARGS_REUSE}\" does not exist.")
 		return()
 	endif()
+
 	foreach(target ${ARGS_UNPARSED_ARGUMENTS})
+
 		if(NOT TARGET "${target}")
 			message(SEND_ERROR "Target \"${target}\" does not exist.")
 			return()
 		endif()
+
 		if(ARGS_REUSE)
 			set(pch_target ${ARGS_REUSE}.pch)
 			set(target_dir
@@ -67,12 +72,15 @@ function(target_precompiled_header) # target [...] header
 				${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${pch_target}.dir
 				)
 		endif()
+
 		__compute_pch_build_path(header_build_path "${header}")
 		set(target_dir_header "${target_dir}/${header_build_path}")
+
 		if(MSVC)
 			get_filename_component(win_pch "${target_dir_header}.pch" ABSOLUTE)
 			get_filename_component(win_header "${header}" ABSOLUTE)
 		endif()
+
 		if(NOT ARGS_REUSE)
 			if(ARGS_TYPE)
 				set(header_type ${ARGS_TYPE})
@@ -149,6 +157,7 @@ function(target_precompiled_header) # target [...] header
 				PCH_COMPILER_EXCLUDE "${exclude}"
 				)
 		endif()
+
 	endforeach()
 endfunction()
 
