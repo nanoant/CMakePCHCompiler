@@ -126,11 +126,11 @@ function(target_precompiled_header) # target [...] header
 			# /Yu - use given include as precompiled header
 			# /Fp - exact location for precompiled header
 			# /FI - force include of precompiled header
-			set(flags "/Yu${abs_header}")
 			target_compile_options(
 				${target} PRIVATE "/Fp${abs_pch}" "/FI${abs_header}"
 				)
 			target_sources(${target} PRIVATE $<TARGET_OBJECTS:${pch_target}>)
+			set(flags "/Yu${abs_header}")
 		else()
 			set(flags -include ${target_dir_header})
 		endif()
@@ -155,8 +155,9 @@ function(target_precompiled_header) # target [...] header
 				"${CMAKE_PCH_COMPILER_TARGETS}"
 				PARENT_SCOPE
 				)
+			# save used PCH insertion flags for future prevention of re-insertion (see below)
 			set_target_properties(${pch_target} PROPERTIES
-				PCH_COMPILER_EXCLUDE "${flags}"
+				PCH_COMPILER_EXCLUDE_FLAGS "${flags}"
 				)
 		endif()
 
@@ -317,19 +318,17 @@ function(__watch_pch_last_hook variable access value)
 			get_target_property(value ${target} ${property})
 			if(NOT value STREQUAL "value-NOTFOUND")
 				string(REGEX REPLACE "(^|_)(C|CXX)(_|$)" "\\1\\2PCH\\3" property "${property}")
+				# make sure we don't insert wrong PCH flags into PCH target COMPILE_OPTIONS
+				if(property STREQUAL "COMPILE_OPTIONS")
+					get_target_property(flags ${pch_target} PCH_COMPILER_EXCLUDE_FLAGS)
+					string(REPLACE "${flags}" "" value "${value}")
+				endif()
+				# copy new target property value into PCH target
 				set_target_properties(${pch_target} PROPERTIES
 					"${property}" "${value}"
 					)
 			endif()
 		endforeach()
-
-		# HACK: remove target_precompiled_header inserted flags
-		get_target_property(exclude ${pch_target} PCH_COMPILER_EXCLUDE)
-		get_target_property(value ${pch_target} COMPILE_OPTIONS)
-		string(REPLACE "${exclude}" "" value "${value}")
-		set_target_properties(${pch_target} PROPERTIES
-			COMPILE_OPTIONS "${value}"
-			)
 	endforeach()
 endfunction()
 
