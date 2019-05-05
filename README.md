@@ -9,9 +9,11 @@ For convenience it defines
 	                          [REUSE other_target]
 	                          [TYPE type])
 
-Uses given header as precompiled header for given target.
+Uses given `header` as precompiled header for given target.
 
-Optionally it may share compiled header object with other target, so it is precompiled just once.
+Optionally it may share compiled header object with `other_target`, so it is precompiled just once.
+
+For advanced users it allows customizing precompiler header `type` passed to compiler, which is normally inferred from the language, e.g. `c++-header` for `CXX`.
 
 **NOTE**: While CMakePCHCompiler ensures that precompiled header is included as first compile unit for each source file, it is still recommended to keep `#include "prefix.h"` (where `prefix.h` is your header file you want to pre-compile - `header` argument) in your source code to ensure your code remains portable regardless of precompiled headers being enabled or not.
 
