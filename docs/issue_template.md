@@ -1,6 +1,8 @@
 ## Acknowledgement
 
-I have read README.md and I have already requested support for precompiled headers at official CMake issue tracker. Nevertheless, I want to continue using CMakePCHCompiler for my project understanding that CMakePCHCompiler is neither official nor proper way to provide PCH support for CMake.
+I have read README.md and I am aware that CMake 3.16 or higher provides official support for precompiled headers and this is **not** the right place to report the problem related to CMake implementation.
+
+Nevertheless, I want to continue using CMakePCHCompiler for my project understanding that CMakePCHCompiler is neither official nor proper way to provide PCH support for CMake and **I am aware this issue will be ignored**, since CMakePCHCompiler is considered obsolete and no further development is planned and no PRs will be accepted.
 
 ## Minimal example
 

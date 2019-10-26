@@ -1,3 +1,5 @@
+> :warning: This project is obsolete as CMake 3.16 or higher provides native support for precompiled headers. No PRs will be accepted and no further development is planned.
+
 CMake Precompiled Headers
 =========================
 
@@ -24,26 +26,26 @@ For more details how to use precompiled header with your library and/or compiler
 
 [pchissue]: https://gitlab.kitware.com/cmake/cmake/issues/1260
 
-1. Read this `README.md` file completely to understand intentions and limitations of this project.
-2. Understand that CMakePCHCompiler is neither official nor proper way to provide PCH support in CMake.
-3. Request first proper precompiled headers support from CMake's maintainers, adding your comment in [dedicated issue at CMake's issue tracker][pchissue].
-4. Understand that the CMakePCHCompiler authors are neither compensated for their efforts not affiliated with KitWare (CMake's authors).
-5. If you know or think you know how to fix / extend CMakePCHCompiler, try to provide PR.
+1. Be aware that CMake 3.16 or higher provides built-in support for precompiled headers, and all related to CMake issues should be reported at [CMake's issue tracker][pchissue].
+2. Be aware that this project is now obsolete and no further development is planned and no PRs will be accepted.
+3. Read this `README.md` file completely to understand intentions and limitations of this project.
+4. Understand that CMakePCHCompiler is neither official nor proper way to provide PCH support in CMake.
+5. Understand that the CMakePCHCompiler authors are neither compensated for their efforts not affiliated with KitWare (CMake's authors).
 
-Why this project exists
------------------------
+Why this project existed
+------------------------
 
+[pchmerge]: https://gitlab.kitware.com/cmake/cmake/merge_requests/3553
 [rfc]: https://cmake.org/pipermail/cmake-developers/2015-February/024598.html
+[cristianadam]: https://github.com/cristianadam/
 
-So far, native support for precompiled headers was requested at CMake's mailing lists and/or its issue tracker many times, however until today CMake does not provide PCH support. This project was started in 2015 as a proof-of-concept implementation accompanying [RFC: CMake precompiled header support and custom compiler based implementation][rfc].
+In summer 2019 [@cristianadam][cristianadam] has finished [native CMake functionality for precompiled headers][pchmerge] that has been merged to mainline CMake and staged for 3.16.0. Until that, native support for precompiled headers was requested for several years at CMake's mailing lists and/or its issue tracker. This project was started in 2015 as a proof-of-concept implementation accompanying [RFC: CMake precompiled header support and custom compiler based implementation][rfc].
 
-**NOTE:** This project was and is neither trying to be official nor proper way to provide PCH support in CMake. Only viable and future-proof solution should be implemented natively in CMake. CMakePCHCompiler authors are not affiliated with KitWare (CMake's authors).
+**NOTE:** This project was and is neither trying to be official nor proper way to provide PCH support in CMake. Authors stated that only viable and future-proof solution was to implement this functionality natively in CMake, and this was done for CMake version 3.16. CMakePCHCompiler authors are not affiliated with KitWare (CMake's authors).
 
-[pchnativepr]: https://gitlab.kitware.com/cmake/cmake/merge_requests/984
+> :warning: Right not this project is considered obsolete, **no further development is planned and no PRs will be accepted**. It is left here for historical purposes.
 
-Recently there was an [effort for such a native implementation][pchnativepr], but this has not been finalized and later discarded. Therefore this project is meant to be maintained until native implementation will arrive to CMake.
-
-See also an [umbrella issue at CMake's issue tracker][pchissue] (KitWare's GitLab) for more information on native PCH support.
+See also an [umbrella issue at CMake's issue tracker][pchissue] (KitWare's GitLab) for more information on native PCH support effort.
 
 Supported & tested platforms
 ----------------------------
